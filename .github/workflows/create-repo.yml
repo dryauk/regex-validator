@@ -1,0 +1,264 @@
+name: Create repository
+
+on:
+  workflow_dispatch:
+    inputs:
+      template:
+        description: 'template'
+        required: true
+        default: 'scratch | nestjs | reactjs'
+      owner:
+        description: 'owner'
+        required: true
+        default: 'dryauk'
+      name:
+        description: 'name'
+        required: true
+        default: 'new-project'
+      description:
+        description: 'description'
+        required: false
+        default: ''
+      isPrivate:
+        description: 'isPrivate'
+        required: false
+        default: 'false'
+      isPublished:
+        description: 'isPublished'
+        required: false
+        default: 'false'
+
+env:
+  TEMPLATE_NAME: '${{ github.event.inputs.template }}'
+  REPO_OWNER: '${{ github.event.inputs.owner }}'
+  REPO_NAME: '${{ github.event.inputs.name }}'
+  REPO_FULL_NAME: '${{ github.event.inputs.owner }}/${{ github.event.inputs.name }}'
+  REPO_DESCRIPTION: '${{ github.event.inputs.description }}'
+  REPO_IS_PRIVATE: '${{ github.event.inputs.isPrivate }}'
+  REPO_IS_PUBLISHED: '${{ github.event.inputs.isPublished }}'
+
+jobs:
+  pre:
+    name: ⚙️   Pre
+
+    runs-on: ubuntu-latest
+
+    outputs:
+      templateRepoFullName: ${{ github.repository }}
+      templateShortSha: ${{ steps.vars.outputs.shortSha }}
+      templateDefaultBranch: ${{ steps.vars.outputs.defaultBranch }}
+
+    steps:
+      - name: Set outputs
+        id: vars
+        run: |
+          DEFAULT_BRANCH=${{ github.event.repository.default_branch }}
+
+          echo "::set-output name=shortSha::$(echo ${{ github.sha }} | cut -c1-7)"
+          echo "::set-output name=defaultBranch::${DEFAULT_BRANCH}"
+
+  create:
+    name: 📦   Create
+
+    needs:
+      - pre
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Create new repository using template
+        run: |
+          echo $(
+            gh api repos/"${TEMPLATE_REPO_FULL_NAME}"/generate \
+              -X POST \
+              -H "Accept: application/vnd.github.baptiste-preview+json" \
+              -F owner="${REPO_OWNER}" \
+              -F name="${REPO_NAME}" \
+              -F description="${REPO_DESCRIPTION}" \
+              -F private=${REPO_IS_PRIVATE}
+          ) | jq '{full_name, description, private, html_url}'
+        env:
+          GITHUB_TOKEN: ${{ secrets.CI_GH_TOKEN }}
+          TEMPLATE_REPO_FULL_NAME: ${{ needs.pre.outputs.templateRepoFullName }}
+
+  setup:
+    name: 🧪   Setup
+
+    needs:
+      - create
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Setup new repository
+        run: |
+          echo $(
+            gh api repos/${REPO_FULL_NAME} \
+              -X PATCH \
+              -H "Accept: application/vnd.github.v3+json" \
+              -F has_issues=false \
+              -F has_projects=false \
+              -F has_wiki=false \
+              -F allow_squash_merge=false \
+              -F allow_merge_commit=false \
+              -F allow_rebase_merge=true \
+              -F delete_branch_on_merge=true
+          ) | jq '{full_name, html_url, has_issues, has_projects, has_wiki, allow_squash_merge, allow_merge_commit, allow_rebase_merge, delete_branch_on_merge}'
+        env:
+          GITHUB_TOKEN: ${{ secrets.CI_GH_TOKEN }}
+
+      - name: Add CI_GH_TOKEN secret to private repository
+        if: ${{ env.REPO_IS_PRIVATE == 'true' }}
+        uses: jon-grey/github-actions-secrets-creator@v1
+        with:
+          location: ${{ env.REPO_FULL_NAME }}
+          name: CI_GH_TOKEN
+          value: ${{ secrets.CI_GH_TOKEN }}
+          pa_token: ${{ secrets.CI_GH_TOKEN }}
+
+      - name: Add CI_NPM_TOKEN secret to private repository
+        if: ${{ env.REPO_IS_PRIVATE == 'true' }}
+        uses: jon-grey/github-actions-secrets-creator@v1
+        with:
+          location: ${{ env.REPO_FULL_NAME }}
+          name: CI_NPM_TOKEN
+          value: ${{ secrets.CI_NPM_TOKEN }}
+          pa_token: ${{ secrets.CI_GH_TOKEN }}
+
+  init:
+    name: 🪄   Init
+
+    needs:
+      - pre
+      - create
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout new repository
+        uses: actions/checkout@v2
+        with:
+          repository: '${{ github.event.inputs.owner }}/${{ github.event.inputs.name }}'
+          ref: ${{ needs.pre.outputs.templateDefaultBranch }}
+          fetch-depth: 0
+          token: ${{ secrets.CI_GH_TOKEN }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: 16
+
+      - name: Setup git config
+        run: |
+          git config --global user.email "dryauk+bot@gmail.com"
+          git config --global user.name "dryauk-bot"
+
+      - name: Copy template
+        run: |
+          cp -fR ./packages/${TEMPLATE_NAME}/* ./
+
+      - name: Fill README
+        run: |
+          if [[ $REPO_IS_PUBLISHED == "true" ]]; then
+            envsubst <.github/templates/${TEMPLATE_NAME}/README.lib.md >README.md
+          else
+            envsubst <.github/templates/${TEMPLATE_NAME}/README.app.md >README.md
+          fi
+
+      - name: Setup package
+        run: |
+          sed -i "s#\"version\": \".*\"#\"version\": \"0.1.0\"#" package.json
+          sed -i "s#\"description\": \".*\"#\"description\": \"${REPO_DESCRIPTION}\"#" package.json
+          sed -i "s#${TEMPLATE_REPO_FULL_NAME}#${REPO_FULL_NAME}#g" package.json
+
+          if [[ $REPO_IS_PUBLISHED == "true" ]]; then
+            sed -i "s#\"name\": \".*\"#\"name\": \"@${REPO_FULL_NAME}\"#" package.json
+            sed -i "s#\"private\": .*#\"publishConfig\": {\\n    \"registry\": \"https://npm.pkg.github.com\"\\n  },#" package.json
+          else
+            sed -i "s#\"name\": \".*\"#\"name\": \"${REPO_NAME}\"#" package.json
+          fi
+        env:
+          TEMPLATE_REPO_FULL_NAME: ${{ needs.pre.outputs.templateRepoFullName }}
+
+      - name: Setup workflows
+        run: |
+          cp -f .github/templates/release.yml .github/workflows/release.yml
+
+      - name: Clean repository
+        run: |
+          rm -rf .github/templates
+          rm -rf packages
+          rm .github/workflows/create-repo.yml
+          rm CHANGELOG.md
+
+      - name: NPM authentication
+        run: npm config set '//npm.pkg.github.com/:_authToken' "${NPM_TOKEN}"
+        env:
+          NPM_TOKEN: ${{ secrets.CI_NPM_TOKEN }}
+
+      - name: Update lock file
+        run: |
+          yarn --ignore-scripts
+
+      - name: Push changes
+        run: |
+          git add .
+          git commit --amend -m "chore: init project" -m "Project initialized with ${TEMPLATE_REPO_FULL_NAME}@${TEMPLATE_SHORT_SHA}"
+          git push --force origin
+        env:
+          TEMPLATE_REPO_FULL_NAME: ${{ needs.pre.outputs.templateRepoFullName }}
+          TEMPLATE_SHORT_SHA: ${{ needs.pre.outputs.templateShortSha }}
+
+  success:
+    name: 🎉   Success
+
+    if: ${{ success() }}
+
+    needs:
+      - setup
+      - init
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Repository created
+        run: |
+          gh api graphql \
+            -F discussionId="MDEwOkRpc2N1c3Npb24zNDc1NjM3" \
+            -F body="🎉   Repository created at ${GITHUB_SERVER_URL}/${REPO_FULL_NAME}" \
+            -f query='
+              mutation AddDiscussionComment(
+                $discussionId: ID!
+                $body: String!
+              ) {
+                addDiscussionComment(input: {
+                  discussionId: $discussionId
+                  body: $body
+                }) {
+                  comment { id }
+                }
+              }
+            '
+        env:
+          GITHUB_TOKEN: ${{ secrets.CI_GH_TOKEN }}
+
+  failure:
+    name: 🗑   Failure
+
+    if: ${{ failure() }}
+
+    needs:
+      - setup
+      - init
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Delete created repository
+        if: ${{ needs.setup.result == 'failure' || needs.init.result == 'failure' }}
+        run: |
+          gh api repos/${REPO_FULL_NAME} \
+            -X DELETE \
+            -H "Accept: application/vnd.github.v3+json"
+        env:
+          GITHUB_TOKEN: ${{ secrets.CI_GH_TOKEN }}

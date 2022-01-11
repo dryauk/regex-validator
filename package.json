@@ -1,0 +1,46 @@
+{
+  "name": "repository-template",
+  "version": "1.6.0",
+  "description": "Repository template",
+  "author": "DryAuk (https://github.com/dryauk)",
+  "homepage": "https://github.com/dryauk/repository-template#readme",
+  "repository": "https://github.com/dryauk/repository-template",
+  "private": true,
+  "license": "MIT",
+  "engines": {
+    "node": ">=16",
+    "yarn": ">=1.20"
+  },
+  "scripts": {
+    "prepare": "husky install",
+    "build": "yarn workspaces run build",
+    "lint": "yarn workspaces run lint",
+    "test": "yarn workspaces run test"
+  },
+  "workspaces": [
+    "packages/scratch",
+    "packages/nestjs",
+    "packages/reactjs"
+  ],
+  "devDependencies": {
+    "@commitlint/cli": "^13.2.1",
+    "@dryauk/commitlint-config": "^2.0.0",
+    "@dryauk/semantic-release-config": "^2.0.0",
+    "husky": "^7.0.2",
+    "jest": "26.6.0",
+    "lint-staged": "^11.2.3",
+    "semantic-release": "^18.0.0"
+  },
+  "optionalDependencies": {
+    "fsevents": "*"
+  },
+  "commitlint": {
+    "extends": "@dryauk/commitlint-config"
+  },
+  "release": {
+    "extends": "@dryauk/semantic-release-config"
+  },
+  "lint-staged": {
+    "*.md": "echo ''"
+  }
+}

@@ -1,0 +1,25 @@
+# OS
+.DS_Store
+
+# IDE
+.idea
+
+# dependencies
+node_modules
+
+# testing
+coverage
+
+# production
+build
+dist
+
+# Eslint
+.eslintcache
+
+# Environment variables
+.env*
+
+# Logs
+yarn-debug.log*
+yarn-error.log*

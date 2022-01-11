@@ -1,0 +1,13 @@
+{
+  "collection": "@nestjs/schematics",
+  "sourceRoot": "src",
+  "entryFile": "main-api",
+  "projects": {
+    "api": {
+      "entryFile": "main-api"
+    },
+    "worker": {
+      "entryFile": "main-worker"
+    }
+  }
+}
