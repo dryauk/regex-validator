@@ -666,13 +666,13 @@
   resolved "https://npm.pkg.github.com/download/@dryauk/prettier-config/1.2.1/43dfa6238ff0645ef8e15dc355b7ef3c8cb664b9857b1048b1c522ae0f7592a2#96a7a14ef5dbfbc6fbf81d9ea59bcdafd9bb95db"
   integrity sha512-e0/GN2VRruzkr82cMpdENxCxh/fI+/9/TCyQFvH/ZWFBd3MQCDoBZDpp66xKE0RFWSy2zGMwCUfdN+kscOU3bg==
 
-"@dryauk/semantic-release-config@^2.0.0":
-  version "2.0.0"
-  resolved "https://npm.pkg.github.com/download/@dryauk/semantic-release-config/2.0.0/321e44b37c7c91ebe8390f6479998f92b6759a8642578309e571e7640f7345ed#a892c9baa5b28391c0928ea8c992869e0826efcc"
-  integrity sha512-ajmlUU42OX7SKz8aSArHG7D6B7kDshQM7KZ4L1+5utn2X8PomrBedlxOiKzRG4MxkLCGobqcGzhTXWezrBMJsQ==
+"@dryauk/semantic-release-config@^2.1.0":
+  version "2.1.0"
+  resolved "https://npm.pkg.github.com/download/@dryauk/semantic-release-config/2.1.0/88136ba8c9891f035226a7b3dd009c7308f6ad8c91a2f9cea13a9b9ef16c6d1e#402e815a51f9c109bc074c8408c14aeedd9f71cd"
+  integrity sha512-IFoOEX6f/xiT06/fafg7gWRUCu6EGY0PWczSAXkisTMa4DZSEmct4m33WAwTCDWksTRiiWfd37zwMnW881zFrg==
   dependencies:
-    "@semantic-release/changelog" "^6.0.0"
-    "@semantic-release/git" "^10.0.0"
+    "@semantic-release/changelog" "^6.0.1"
+    "@semantic-release/git" "^10.0.1"
 
 "@endemolshinegroup/cosmiconfig-typescript-loader@^3.0.2":
   version "3.0.2"
@@ -1182,12 +1182,12 @@
   dependencies:
     "@octokit/openapi-types" "^10.6.4"
 
-"@semantic-release/changelog@^6.0.0":
-  version "6.0.0"
-  resolved "https://registry.yarnpkg.com/@semantic-release/changelog/-/changelog-6.0.0.tgz#b16636009bfbde9c09c6c1b89463af257d4a7142"
-  integrity sha512-X01Me+QVMykvILockNGlXXl3dgr1QqpbRQsknQoOJQCXQGXoqY3DNQ3rBQuI8/SUK7RZwYLctg0NbPNArlo6eQ==
+"@semantic-release/changelog@^6.0.1":
+  version "6.0.1"
+  resolved "https://registry.yarnpkg.com/@semantic-release/changelog/-/changelog-6.0.1.tgz#8dd0334fd8c7d50cda747d2591e4f18f816b3c9c"
+  integrity sha512-FT+tAGdWHr0RCM3EpWegWnvXJ05LQtBkQUaQRIExONoXjVjLuOILNm4DEKNaV+GAQyJjbLRVs57ti//GypH6PA==
   dependencies:
-    "@semantic-release/error" "^2.1.0"
+    "@semantic-release/error" "^3.0.0"
     aggregate-error "^3.0.0"
     fs-extra "^9.0.0"
     lodash "^4.17.4"
@@ -1205,7 +1205,7 @@
     lodash "^4.17.4"
     micromatch "^4.0.2"
 
-"@semantic-release/error@^2.1.0", "@semantic-release/error@^2.2.0":
+"@semantic-release/error@^2.2.0":
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/@semantic-release/error/-/error-2.2.0.tgz#ee9d5a09c9969eade1ec864776aeda5c5cddbbf0"
   integrity sha512-9Tj/qn+y2j+sjCI3Jd+qseGtHjOAeg7dU2/lVcqIQ9TV3QDaDXDYXcoOHU+7o2Hwh8L8ymL4gfuO7KxDs3q2zg==
@@ -1215,12 +1215,12 @@
   resolved "https://registry.yarnpkg.com/@semantic-release/error/-/error-3.0.0.tgz#30a3b97bbb5844d695eb22f9d3aa40f6a92770c2"
   integrity sha512-5hiM4Un+tpl4cKw3lV4UgzJj+SmfNIDCLLw0TepzQxz9ZGV5ixnqkzIVF+3tp0ZHgcMKE+VNGHJjEeyFG2dcSw==
 
-"@semantic-release/git@^10.0.0":
-  version "10.0.0"
-  resolved "https://registry.yarnpkg.com/@semantic-release/git/-/git-10.0.0.tgz#41dda434e9c2fe222d030f12060e6f5a8696e7ba"
-  integrity sha512-/BljvngXJzwbFFJouxHHvSzAhi5iaucF7l0kQPszD4m7Y79+FHyvQl5Q/HK7T/e8MIwU9hz321KjOZn9yfSpPg==
+"@semantic-release/git@^10.0.1":
+  version "10.0.1"
+  resolved "https://registry.yarnpkg.com/@semantic-release/git/-/git-10.0.1.tgz#c646e55d67fae623875bf3a06a634dd434904498"
+  integrity sha512-eWrx5KguUcU2wUPaO6sfvZI0wPafUKAMNC18aXY4EnNcrZL86dEmpNVnC9uMpGZkmZJ9EfCVJBQx4pV4EMGT1w==
   dependencies:
-    "@semantic-release/error" "^2.1.0"
+    "@semantic-release/error" "^3.0.0"
     aggregate-error "^3.0.0"
     debug "^4.0.0"
     dir-glob "^3.0.0"
